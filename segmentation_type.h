@@ -13,6 +13,9 @@
  * @brief The types of Track segmentation supported by OpenMOC.
  */
 enum segmentationType {
+  /** Explicit 2D segments */
+  TWO_DIM,
+  
   /** Explicit 3D segments */
   EXPLICIT,
 

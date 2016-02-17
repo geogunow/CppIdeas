@@ -14,30 +14,56 @@
 #include "Track2D.h"
 #include "Track3D.h"
 #include "Geometry.h"
+#include "TrackGenerator.h"
 
+class TraverseSegments {
 
-template <typename T>
-class TraverseSegments<T> {
+private:
+  
+  // descriptions
+  CounterKernel* initializeKernel<CounterKernel>();
+  VolumeKernel* initializeKernel<VolumeKernel>();
+  SegmentationKernel* initializeKernel<SegmentationKernel>();
+
+  void loopOverTracks2D();
+  void loopOverTracksExplicit();
+  void loopOverTracksByTrackOTF();
+  void loopOverTracksByStackOTF();
 
 protected:
 
-  /** Pointer to the associate TrackGenerator */
+  /** Pointer to the associated TrackGenerator */
   TrackGenerator* _track_generator;
 
-public:
+  // descriptions
+  MOCKernel** _kernels;
+  segment** _temporary_segments;
+  FP_PRECISION* _FSR_volumes;
+  omp_lock_t* _FSR_locks;
 
-  TraverseSegments(segmentationType type);
+  //descriptions
+  segmentationType _segment_formation;
+  FP_PRECISION _max_optical_length;
+  int _curr_z_index;
+
+  // descriptions
+  TraverseSegments(TrackGenerator* track_generator);
   virtual ~TraverseSegments();
 
-  /* Set parameters */
+  void allocateTemporarySegmentStorage();
+  void deallocateTemporarySegmentStorage();
 
-  /* Get parameters */
-
-  /* Functions to loop over tracks and do work */
-  void execute();
-  void pre();
+  //TODO TEMPLATE
+  template <class KernelType>
+  void allocateKernels<KernelType>();
+  template <class KernelType>
+  void deallocateKernels<KernelType>();
   void loopOverTracks();
-  void onTrack();
-  void post();
+
+public:
+  virtual void execute() = 0;
+  virtual void onTrack(Track* track, segment* segments) = 0;
 
 };
+
+#endif
